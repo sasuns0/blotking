@@ -1,37 +1,72 @@
-import { Button, Platform, Pressable, StyleSheet, View, Text } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { HelloWave } from '@/components/hello-wave';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { useState } from 'react';
+import { useRouter } from 'expo-router';
 
 export default function HomeScreen() {
+  const [step, setStep] = useState(0);
+  const router = useRouter();
+
   return (
-    <View style={styles.viewContainer}>
+    <View style={styles.centeredView}>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome BlotKing</ThemedText>
-        <HelloWave />
+        {step === 0 ?
+          <>
+            <ThemedText type="title">Welcome BlotKing</ThemedText>
+            <HelloWave />
+          </>
+          : <>
+            <Pressable onPress={() => setStep(0)} style={({ pressed }) => [styles.backButton, pressed && styles.backButtonPressed]}>
+              <Text style={styles.backButtonText}>←</Text>
+            </Pressable>
+            <ThemedText type="title">Select Teams</ThemedText>
+          </>
+        }
       </ThemedView>
 
-      <ThemedView style={styles.buttonContainer}>
-        <Pressable style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}>
-          <Text style={styles.buttonText}>New Game</Text>
-        </Pressable>
+      {
+        step === 0 ?
+          <ThemedView style={styles.buttonContainer}>
+            <Pressable onPress={() => setStep(1)} style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}>
+              <Text style={styles.buttonText}>New Score</Text>
+            </Pressable>
 
-        <Pressable style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}>
-          <Text style={styles.buttonText}>Blot Rules</Text>
-        </Pressable>
+            <Pressable onPress={() => router.push('/rules')} style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}>
+              <Text style={styles.buttonText}>Blot Rules</Text>
+            </Pressable>
 
-        <Pressable style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}>
-          <Text style={styles.buttonText}>Leaderboard</Text>
-        </Pressable>
-      </ThemedView>
+            <Pressable style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}>
+              <Text style={styles.buttonText}>Leaderboard</Text>
+            </Pressable>
+          </ThemedView>
+          : <ThemedView style={styles.buttonContainer}>
+            <TextInput
+              placeholder="Team 1"
+              placeholderTextColor="#9CA3AF"
+              style={styles.teamInput}
+              multiline={false}
+            />
+            <TextInput
+              placeholder="Team 2"
+              placeholderTextColor="#9CA3AF"
+              style={styles.teamInput}
+              multiline={false}
+            />
+            <Pressable style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}>
+              <Text style={styles.buttonText}>Start Game</Text>
+            </Pressable>
+          </ThemedView>
+      }
+
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  viewContainer: {
+  centeredView: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center'
@@ -41,11 +76,44 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
+  backButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#2B5A42',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backButtonPressed: {
+    opacity: 0.85,
+    transform: [{ scale: 0.96 }],
+  },
+  backButtonText: {
+    color: '#F8FAFC',
+    fontSize: 20,
+    lineHeight: 22,
+  },
   buttonContainer: {
     alignItems: 'center',
     gap: 16,
     marginTop: 24,
     width: '100%',
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   button: {
     backgroundColor: "#1E3A2B",
@@ -63,10 +131,24 @@ const styles = StyleSheet.create({
     opacity: 0.85,
     transform: [{ scale: 0.98 }],
   },
+  buttonClose: {
+    backgroundColor: '#2196F3',
+  },
   buttonText: {
     color: "#F8FAFC",
     fontSize: 20,
     textAlign: 'center',
+  },
+  teamInput: {
+    width: '90%',
+    minHeight: 48,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#2B5A42',
+    backgroundColor: '#0F1F17',
+    color: '#F8FAFC',
+    fontSize: 18,
   },
   stepContainer: {
     gap: 8,
