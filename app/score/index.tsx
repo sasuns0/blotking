@@ -3,13 +3,38 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { StartGameModal } from '@/components/start-game-modal';
+
+export const SUITS = [
+  { symbol: '♠', name: 'Spades', color: '#F8FAFC', value: "ace" },
+  { symbol: '♥', name: 'Hearts', color: '#EF4444', value: "heart" },
+  { symbol: '♣', name: 'Clubs', color: '#F8FAFC', value: "club" },
+  { symbol: '♦', name: 'Diamonds', color: '#EF4444', value: "diamond" },
+  { symbol: 'A', name: 'Ace', color: '#F8FAFC', value: "ace" },
+];
+
 
 const INITIAL_ROUNDS = [
   { round: '', team1: '', team2: '' },
 ];
 
+export type Round = {
+  suite: "ace" | "club" | "heart" | "diamond" | "ace",
+  number: number,
+  isQuanshed: boolean,
+  isSured: boolean
+}
+
 export default function ScoreScreen() {
   const [rounds, setRounds] = useState(INITIAL_ROUNDS);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const openModal = () => setModalVisible(true);
+  const closeModal = () => setModalVisible(false);
+
+  const onStart = () => {
+
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -30,6 +55,7 @@ export default function ScoreScreen() {
         </ThemedText>
         <View style={styles.rightButtonContainer}>
           <Pressable
+            onPress={openModal}
             style={({ pressed }) => [
               styles.startButton,
               pressed && styles.startButtonPressed,
@@ -39,6 +65,8 @@ export default function ScoreScreen() {
           </Pressable>
         </View>
       </View>
+
+      <StartGameModal visible={modalVisible} onClose={closeModal} />
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         {/* Table Header */}
