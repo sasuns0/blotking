@@ -22,7 +22,7 @@ export default function HomeScreen() {
             <Pressable onPress={() => setStep(0)} style={({ pressed }) => [styles.backButton, pressed && styles.backButtonPressed]}>
               <Text style={styles.backButtonText}>←</Text>
             </Pressable>
-            <ThemedText type="title">Select Teams</ThemedText>
+            <ThemedText type="title" style={styles.selectTeamsTitle}>Select Teams</ThemedText>
           </>
         }
       </ThemedView>
@@ -55,7 +55,7 @@ export default function HomeScreen() {
               style={styles.teamInput}
               multiline={false}
             />
-            <Pressable style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}>
+            <Pressable onPress={() => router.push('/score')} style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}>
               <Text style={styles.buttonText}>Start Game</Text>
             </Pressable>
           </ThemedView>
@@ -93,6 +93,10 @@ const styles = StyleSheet.create({
     color: '#F8FAFC',
     fontSize: 20,
     lineHeight: 22,
+  },
+  selectTeamsTitle: {
+    lineHeight: 36,
+    includeFontPadding: false,
   },
   buttonContainer: {
     alignItems: 'center',
