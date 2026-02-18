@@ -1,5 +1,6 @@
 import { Round, SuitType } from '@/app/score';
 import { SUITS } from '@/constants/values';
+import { useTeamsStore } from '@/store/teamsStore';
 import { useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { ActionButton } from '../ui/action-button';
@@ -11,61 +12,71 @@ interface StartGameModalProps {
   onScoreSubmit: (round: Round) => void;
 }
 
+type ScoreState = {
+  selectedSuit?: SuitType;
+  roundNumber: number;
+  isQuanshSelected: boolean;
+  isSurSelected: boolean;
+  selectedTeam?: "team1" | "team2";
+}
+
+const initialFormState = {
+  selectedSuit: undefined,
+  roundNumber: 8,
+  isQuanshSelected: false,
+  isSurSelected: false,
+  selectedTeam: undefined
+}
+
 export function StartGameModal({ visible, onClose, onScoreSubmit }: StartGameModalProps) {
-  const [selectedSuit, setSelectedSuit] = useState<SuitType | null>(null);
-  const [roundNumber, setRoundNumber] = useState(8);
-  const [isQuanshSelected, setIsQuanshSelected] = useState(false);
-  const [isSurSelected, setIsSurSelected] = useState(false);
+  const [score, setScore] = useState<ScoreState>(initialFormState);
+  const { team1, team2 } = useTeamsStore();
 
   const handleSuitSelect = (suitName: SuitType) => {
-    setSelectedSuit(suitName);
+    setScore({ ...score, selectedSuit: suitName })
+  };
+
+  const handleTeamSelect = (teamId: 'team1' | 'team2') => {
+    setScore({ ...score, selectedTeam: teamId })
   };
 
   const handleQuanshSelect = () => {
-    setIsQuanshSelected((prev) => {
-      if (prev) {
-        return false;
-      } else {
-        setIsSurSelected(false);
-        return true;
-      }
-    });
+    setScore((prev) => ({
+      ...prev,
+      isQuanshSelected: !prev.isQuanshSelected,
+      isSurSelected: !prev.isQuanshSelected ? false : prev.isSurSelected
+    }))
   };
 
   const handleSurSelect = () => {
-    setIsSurSelected((prev) => {
-      if (prev) {
-        return false;
-      } else {
-        setIsQuanshSelected(false);
-        return true;
-      }
-    });
+    setScore((prev) => ({
+      ...prev,
+      isQuanshSelected: !score.isSurSelected ? false : prev.isQuanshSelected,
+      isSurSelected: !score.isSurSelected
+    }))
   };
 
   const handleClose = () => {
-    setSelectedSuit(null);
-    setIsQuanshSelected(false);
-    setIsSurSelected(false);
-    setRoundNumber(8);
+    setScore(initialFormState);
     onClose();
   };
 
   const handleStartGame = () => {
-    if (!selectedSuit) {
+    if (!score.selectedSuit || !score.selectedTeam) {
       return
     }
 
     onScoreSubmit({
-      suit: selectedSuit,
-      number: roundNumber,
-      isQuanshed: isQuanshSelected,
-      isSured: isSurSelected
+      suit: score.selectedSuit,
+      number: score.roundNumber,
+      isQuanshed: score.isQuanshSelected,
+      isSured: score.isSurSelected,
+      selectedTeam: score.selectedTeam
     })
   }
 
-  const incrementRound = () => setRoundNumber((prev) => prev + 1);
-  const decrementRound = () => setRoundNumber((prev) => (prev > 8 ? prev - 1 : 8));
+  const incrementRound = () => setScore((prev) => ({ ...prev, roundNumber: prev.roundNumber + 1 }));
+  const decrementRound = () => setScore((prev) => ({ ...prev, roundNumber: prev.roundNumber <= 8 ? 8 : prev.roundNumber - 1 }));
 
   return (
     <Modal
@@ -82,6 +93,33 @@ export function StartGameModal({ visible, onClose, onScoreSubmit }: StartGameMod
               <Text style={styles.modalTitle}>Որոշեք խաղը</Text>
             </View>
 
+            {/* Team Selection */}
+            <View style={styles.section}>
+              <Text style={styles.sectionLabel}>Ընտրեք թիմը</Text>
+              <View style={styles.teamsContainer}>
+                <Pressable
+                  onPress={() => handleTeamSelect('team1')}
+                  style={({ pressed }) => [
+                    styles.teamButton,
+                    score.selectedTeam === 'team1' && styles.teamButtonSelected,
+                    pressed && styles.teamButtonPressed,
+                  ]}
+                >
+                  <Text style={styles.teamButtonText}>{team1.name}</Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => handleTeamSelect('team2')}
+                  style={({ pressed }) => [
+                    styles.teamButton,
+                    score.selectedTeam === 'team2' && styles.teamButtonSelected,
+                    pressed && styles.teamButtonPressed,
+                  ]}
+                >
+                  <Text style={styles.teamButtonText}>{team2.name}</Text>
+                </Pressable>
+              </View>
+            </View>
+
             {/* Suit Selection */}
             <View style={styles.section}>
               <View style={styles.suitsGrid}>
@@ -91,7 +129,7 @@ export function StartGameModal({ visible, onClose, onScoreSubmit }: StartGameMod
                     onPress={() => handleSuitSelect(suit.value)}
                     style={({ pressed }) => [
                       styles.suitCard,
-                      selectedSuit === suit.value && styles.suitCardSelected,
+                      score.selectedSuit === suit.value && styles.suitCardSelected,
                       pressed && styles.suitCardPressed,
                     ]}
                   >
@@ -105,7 +143,7 @@ export function StartGameModal({ visible, onClose, onScoreSubmit }: StartGameMod
 
             {/* Number Stepper Section */}
             <View style={styles.section}>
-              <Stepper decrement={decrementRound} increment={incrementRound} number={roundNumber} />
+              <Stepper decrement={decrementRound} increment={incrementRound} number={score.roundNumber} />
             </View>
 
             {/* Action Buttons Row */}
@@ -114,14 +152,14 @@ export function StartGameModal({ visible, onClose, onScoreSubmit }: StartGameMod
                 text="Քուանշ"
                 type="secondary"
                 onSubmit={handleQuanshSelect}
-                selected={isQuanshSelected}
+                selected={score.isQuanshSelected}
                 selectedStyle={styles.actionButtonSelectedRed}
               />
               <ActionButton
                 text="Սուր"
                 type="secondary"
                 onSubmit={handleSurSelect}
-                selected={isSurSelected}
+                selected={score.isSurSelected}
                 selectedStyle={styles.actionButtonSelectedRed}
               />
             </View>
@@ -281,5 +319,35 @@ const styles = StyleSheet.create({
     gap: 12,
     justifyContent: 'center',
     alignSelf: 'center',
+  },
+  // Team Selection Styles
+  teamsContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    justifyContent: 'center',
+  },
+  teamButton: {
+    backgroundColor: '#0F1F17',
+    borderWidth: 2,
+    borderColor: '#2B5A42',
+    borderRadius: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 100,
+  },
+  teamButtonSelected: {
+    borderColor: '#4ADE80',
+    backgroundColor: '#1E3A2B',
+  },
+  teamButtonPressed: {
+    opacity: 0.85,
+    transform: [{ scale: 0.96 }],
+  },
+  teamButtonText: {
+    color: '#F8FAFC',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

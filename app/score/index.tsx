@@ -7,6 +7,7 @@ import { StartGameModal } from '@/components/custom/start-game-modal';
 import { FinishGameModal } from '@/components/custom/finish-game-modal';
 import { RoundBadge } from '@/components/custom/round-badge';
 import { SUITS } from '@/constants/values';
+import { useTeamsStore } from '@/store/teamsStore';
 
 export type SuitType = "spade" | "club" | "heart" | "diamond" | "ace";
 
@@ -27,7 +28,8 @@ export type Round = {
   suit: SuitType,
   number: number,
   isQuanshed: boolean,
-  isSured: boolean
+  isSured: boolean,
+  selectedTeam?: 'team1' | 'team2'
 }
 
 export default function ScoreScreen() {
@@ -70,6 +72,8 @@ export default function ScoreScreen() {
     });
     closeFinishModal();
   }
+
+  const { team1, team2 } = useTeamsStore();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -118,8 +122,8 @@ export default function ScoreScreen() {
         {/* Table Header */}
         <View style={styles.tableHeader}>
           <Text style={[styles.headerCell, styles.roundCell]}>Խոսացած</Text>
-          <Text style={[styles.headerCell, styles.scoreCell]}>Team 1</Text>
-          <Text style={[styles.headerCell, styles.scoreCell]}>Team 2</Text>
+          <Text style={[styles.headerCell, styles.scoreCell]}>{team1.name}</Text>
+          <Text style={[styles.headerCell, styles.scoreCell]}>{team2.name}</Text>
         </View>
 
         {/* Table Rows */}

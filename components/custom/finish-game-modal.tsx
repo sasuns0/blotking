@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Round, Score } from '@/app/score';
-import { Cards4 } from '@/constants/values';
+import { Adds, Cards4 } from '@/constants/values';
 import { RoundBadge } from '@/components/custom/round-badge';
 import { AddButtons } from '@/components/custom/add-buttons';
 
@@ -11,6 +11,17 @@ interface FinishGameModalProps {
   onClose: () => void;
   onRecordScore: (team1Score: string, team2Score: string) => void;
   onConfirmFinish: () => void;
+}
+
+type AddsType = {
+  belote: boolean;
+  terz: boolean;
+  fifty: boolean;
+  hundred: boolean;
+  cards4: {
+    type: "9" | "10" | "j" | "q" | "k" | "a",
+    value: number
+  }
 }
 
 export function FinishGameModal({ visible, rounds, onClose, onRecordScore, onConfirmFinish }: FinishGameModalProps) {

@@ -5,6 +5,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
+import { useTeamsStore } from '@/store/teamsStore';
 
 export default function HomeScreen() {
   const [step, setStep] = useState(0);
@@ -12,9 +13,13 @@ export default function HomeScreen() {
   const [team2Input, setTeam2Input] = useState("");
 
   const router = useRouter();
+  const { setTeam1Name, setTeam2Name } = useTeamsStore();
 
   const handleOnStart = () => {
     if (team1Input && team2Input) {
+      // Save team names to store
+      setTeam1Name(team1Input);
+      setTeam2Name(team2Input);
       router.push('/score')
     }
   }
