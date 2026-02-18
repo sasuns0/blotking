@@ -14,38 +14,61 @@ interface FinishGameModalProps {
 }
 
 type AddsType = {
-  belote: boolean;
-  terz: boolean;
-  fifty: boolean;
-  hundred: boolean;
-  cards4: {
+  belote?: boolean;
+  terz?: boolean;
+  fifty?: boolean;
+  hundred?: boolean;
+  cards4?: {
     type: "9" | "10" | "j" | "q" | "k" | "a",
     value: number
   }
 }
 
+type TeamData = {
+  score: string,
+  adds: AddsType
+}
+
+type StateType = {
+  team1: TeamData,
+  team2: TeamData
+}
+
+const initialState: StateType = {
+  team1: {
+    score: "",
+    adds: {}
+  },
+  team2: {
+    score: "",
+    adds: {}
+  }
+}
+
 export function FinishGameModal({ visible, rounds, onClose, onRecordScore, onConfirmFinish }: FinishGameModalProps) {
-  const [team1Input, setTeam1Input] = useState('');
-  const [team2Input, setTeam2Input] = useState('');
   const [isAX2Selected, setIsAX2Selected] = useState(false);
-  const [team1Card, setTeam1Card] = useState<string | null>(null);
-  const [team2Card, setTeam2Card] = useState<string | null>(null);
-  const [showTeam1Dropdown, setShowTeam1Dropdown] = useState(false);
-  const [showTeam2Dropdown, setShowTeam2Dropdown] = useState(false);
+  const [roundScore, setRoundScore] = useState(initialState);
 
   const currentRound = rounds.length > 0 ? rounds[rounds.length - 1] : null;
   const roundInfo = currentRound?.round;
 
   const handleRecordScore = () => {
-    onRecordScore(team1Input, team2Input);
-    setTeam1Input('');
-    setTeam2Input('');
-    setIsAX2Selected(false);
-    setTeam1Card(null);
-    setTeam2Card(null);
+    // onRecordScore(team1Input, team2Input);
+    setRoundScore(initialState)
+    setIsAX2Selected(false)
   };
 
-  const canRecord = team1Input !== '' && team2Input !== '';
+  const canRecord = roundScore.team1.score !== '' && roundScore.team2.score !== '';
+
+  const updateScore = (team: "team1" | "team2", score: string) => {
+    const newScoreState = team === "team1"
+      ? {
+        team1: { score, adds: roundScore.team1.adds }
+      } : {
+        team2: { score, adds: roundScore.team2.adds }
+      }
+    setRoundScore((prev) => ({ ...prev, newScoreState }))
+  }
 
   return (
     <Modal
@@ -79,8 +102,8 @@ export function FinishGameModal({ visible, rounds, onClose, onRecordScore, onCon
               <Text style={styles.inputLabel}>Team 1 Score</Text>
               <TextInput
                 style={styles.scoreInput}
-                value={team1Input}
-                onChangeText={setTeam1Input}
+                value={roundScore.team1.score}
+                onChangeText={(value) => updateScore("team1", value)}
                 keyboardType="numeric"
                 placeholder="0"
                 placeholderTextColor="#4B5563"
@@ -103,7 +126,7 @@ export function FinishGameModal({ visible, rounds, onClose, onRecordScore, onCon
                       <Pressable
                         key={card.name}
                         onPress={() => {
-                          setTeam1Card(card.value);
+                          // setTeam1Card(card.value);
                           setShowTeam1Dropdown(false);
                         }}
                         style={({ pressed }) => [
@@ -130,8 +153,8 @@ export function FinishGameModal({ visible, rounds, onClose, onRecordScore, onCon
               <Text style={styles.inputLabel}>Team 2 Score</Text>
               <TextInput
                 style={styles.scoreInput}
-                value={team2Input}
-                onChangeText={setTeam2Input}
+                value={roundScore.team2.score}
+                onChangeText={(value) => updateScore("team2", value)}
                 keyboardType="numeric"
                 placeholder="0"
                 placeholderTextColor="#4B5563"
