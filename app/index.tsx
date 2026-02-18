@@ -8,21 +8,30 @@ import { useRouter } from 'expo-router';
 
 export default function HomeScreen() {
   const [step, setStep] = useState(0);
+  const [team1Input, setTeam1Input] = useState("");
+  const [team2Input, setTeam2Input] = useState("");
+
   const router = useRouter();
+
+  const handleOnStart = () => {
+    if (team1Input && team2Input) {
+      router.push('/score')
+    }
+  }
 
   return (
     <View style={styles.centeredView}>
       <ThemedView style={styles.titleContainer}>
         {step === 0 ?
           <>
-            <ThemedText type="title">Welcome BlotKing</ThemedText>
+            <ThemedText type="title">Բարի Գալուստ</ThemedText>
             <HelloWave />
           </>
           : <>
             <Pressable onPress={() => setStep(0)} style={({ pressed }) => [styles.backButton, pressed && styles.backButtonPressed]}>
               <Text style={styles.backButtonText}>←</Text>
             </Pressable>
-            <ThemedText type="title" style={styles.selectTeamsTitle}>Select Teams</ThemedText>
+            <ThemedText type="title" style={styles.selectTeamsTitle}>Ընտրեք Թիմը</ThemedText>
           </>
         }
       </ThemedView>
@@ -31,32 +40,36 @@ export default function HomeScreen() {
         step === 0 ?
           <ThemedView style={styles.buttonContainer}>
             <Pressable onPress={() => setStep(1)} style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}>
-              <Text style={styles.buttonText}>New Score</Text>
+              <Text style={styles.buttonText}>Նոր Հաշիվ</Text>
             </Pressable>
 
             <Pressable onPress={() => router.push('/rules')} style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}>
-              <Text style={styles.buttonText}>Blot Rules</Text>
+              <Text style={styles.buttonText}>Կանոններ</Text>
             </Pressable>
 
             <Pressable style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}>
-              <Text style={styles.buttonText}>Leaderboard</Text>
+              <Text style={styles.buttonText}>Ստատիստիկա</Text>
             </Pressable>
           </ThemedView>
           : <ThemedView style={styles.buttonContainer}>
             <TextInput
-              placeholder="Team 1"
+              placeholder="Թիմ 1"
               placeholderTextColor="#9CA3AF"
               style={styles.teamInput}
               multiline={false}
+              value={team1Input}
+              onChangeText={setTeam1Input}
             />
             <TextInput
-              placeholder="Team 2"
+              placeholder="Թիմ 2"
               placeholderTextColor="#9CA3AF"
               style={styles.teamInput}
               multiline={false}
+              value={team2Input}
+              onChangeText={setTeam2Input}
             />
-            <Pressable onPress={() => router.push('/score')} style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}>
-              <Text style={styles.buttonText}>Start Game</Text>
+            <Pressable onPress={handleOnStart} style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}>
+              <Text style={styles.buttonText}>Սկսել Խաղը</Text>
             </Pressable>
           </ThemedView>
       }

@@ -3,37 +3,72 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { StartGameModal } from '@/components/start-game-modal';
+import { StartGameModal } from '@/components/custom/start-game-modal';
+import { FinishGameModal } from '@/components/custom/finish-game-modal';
+import { RoundBadge } from '@/components/custom/round-badge';
+import { SUITS } from '@/constants/values';
 
-export const SUITS = [
-  { symbol: '♠', name: 'Spades', color: '#F8FAFC', value: "ace" },
-  { symbol: '♥', name: 'Hearts', color: '#EF4444', value: "heart" },
-  { symbol: '♣', name: 'Clubs', color: '#F8FAFC', value: "club" },
-  { symbol: '♦', name: 'Diamonds', color: '#EF4444', value: "diamond" },
-  { symbol: 'A', name: 'Ace', color: '#F8FAFC', value: "ace" },
-];
+export type SuitType = "spade" | "club" | "heart" | "diamond" | "ace";
 
+export interface Suit {
+  symbol: string;
+  name: string;
+  color: string;
+  value: SuitType;
+}
 
-const INITIAL_ROUNDS = [
-  { round: '', team1: '', team2: '' },
-];
+export type Score = {
+  round: Round,
+  team1: string,
+  team2: string
+}
 
 export type Round = {
-  suite: "ace" | "club" | "heart" | "diamond" | "ace",
+  suit: SuitType,
   number: number,
   isQuanshed: boolean,
   isSured: boolean
 }
 
 export default function ScoreScreen() {
-  const [rounds, setRounds] = useState(INITIAL_ROUNDS);
+  const [rounds, setRounds] = useState<Score[]>([]);
+  const [isGameStarted, setGameStarted] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [finishModalVisible, setFinishModalVisible] = useState(false);
 
   const openModal = () => setModalVisible(true);
   const closeModal = () => setModalVisible(false);
+  const openFinishModal = () => setFinishModalVisible(true);
+  const closeFinishModal = () => setFinishModalVisible(false);
 
-  const onStart = () => {
+  const onScoreSubmit = (round: Round) => {
+    setRounds([...rounds, { round, team1: '', team2: '' }])
+    setGameStarted(true)
+    closeModal()
+  }
 
+  const handleConfirmFinish = () => {
+    setGameStarted(false);
+    closeFinishModal();
+  }
+
+  const getSuiteByValue = (value: SuitType) => {
+    return SUITS.find(item => item.value === value)?.symbol;
+  }
+
+  const onRecordScore = (team1Score: string, team2Score: string) => {
+    setRounds(prevRounds => {
+      const newRounds = [...prevRounds];
+      if (newRounds.length > 0) {
+        newRounds[newRounds.length - 1] = {
+          ...newRounds[newRounds.length - 1],
+          team1: team1Score,
+          team2: team2Score
+        };
+      }
+      return newRounds;
+    });
+    closeFinishModal();
   }
 
   return (
@@ -51,33 +86,44 @@ export default function ScoreScreen() {
           </Pressable>
         </View>
         <ThemedText type="title" style={styles.title}>
-          Score
+          Հաշիվ
         </ThemedText>
         <View style={styles.rightButtonContainer}>
           <Pressable
-            onPress={openModal}
+            onPress={isGameStarted ? openFinishModal : openModal}
             style={({ pressed }) => [
               styles.startButton,
+              isGameStarted && styles.finishButton,
               pressed && styles.startButtonPressed,
             ]}
           >
-            <Text style={styles.startButtonText}>Start</Text>
+            <Text style={styles.startButtonText}>
+              {isGameStarted ? 'Ավարտել' : 'Սկսել'}
+            </Text>
           </Pressable>
         </View>
       </View>
 
-      <StartGameModal visible={modalVisible} onClose={closeModal} />
+      <StartGameModal visible={modalVisible} onScoreSubmit={onScoreSubmit} onClose={closeModal} />
+
+      <FinishGameModal
+        visible={finishModalVisible}
+        rounds={rounds}
+        onClose={closeFinishModal}
+        onRecordScore={onRecordScore}
+        onConfirmFinish={handleConfirmFinish}
+      />
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         {/* Table Header */}
         <View style={styles.tableHeader}>
-          <Text style={[styles.headerCell, styles.roundCell]}>Round</Text>
+          <Text style={[styles.headerCell, styles.roundCell]}>Խոսացած</Text>
           <Text style={[styles.headerCell, styles.scoreCell]}>Team 1</Text>
           <Text style={[styles.headerCell, styles.scoreCell]}>Team 2</Text>
         </View>
 
         {/* Table Rows */}
-        {rounds.map((item, index) => (
+        {rounds?.map((item, index) => (
           <View
             key={index}
             style={[
@@ -85,9 +131,9 @@ export default function ScoreScreen() {
               index % 2 !== 0 && styles.tableRowEven,
             ]}
           >
-            <Text style={[styles.cell, styles.roundCell, styles.scoreCellNonEditable]}>
-              {item.round}
-            </Text>
+            <View style={[styles.roundCell, styles.roundCellContainer]}>
+              <RoundBadge round={item.round} />
+            </View>
             <Text style={[styles.cell, styles.scoreCell, styles.scoreCellNonEditable]}>
               {item.team1}
             </Text>
@@ -151,6 +197,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  finishButton: {
+    backgroundColor: '#EF4444',
+  },
   startButtonPressed: {
     opacity: 0.85,
     transform: [{ scale: 0.96 }],
@@ -202,7 +251,6 @@ const styles = StyleSheet.create({
   },
   roundCell: {
     flex: 1,
-    textAlign: 'center',
   },
   scoreCell: {
     flex: 1.5,
@@ -222,5 +270,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     marginHorizontal: 4,
     textAlign: 'center',
+  },
+  // Beautiful round cell styles
+  roundCellContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    minWidth: 0,
   },
 });

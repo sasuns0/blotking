@@ -38,7 +38,7 @@ export default function RulesScreen() {
         <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backButton, pressed && styles.backButtonPressed]}>
           <Text style={styles.backButtonText}>←</Text>
         </Pressable>
-        <ThemedText type="title" style={styles.title}>Blot Rules</ThemedText>
+        <ThemedText type="title" style={styles.title}>Կանոններ</ThemedText>
       </View>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         <ThemedText style={styles.rulesText}>
