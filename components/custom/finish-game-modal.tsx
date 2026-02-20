@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Round, Score } from '@/app/score';
-import { Adds, Cards4 } from '@/constants/values';
 import { RoundBadge } from '@/components/custom/round-badge';
 import { AddButtons } from '@/components/custom/add-buttons';
+import { useTeamsStore } from '@/store/teamsStore';
 
 interface FinishGameModalProps {
   visible: boolean;
@@ -13,61 +13,50 @@ interface FinishGameModalProps {
   onConfirmFinish: () => void;
 }
 
-type AddsType = {
-  belote?: boolean;
-  terz?: boolean;
-  fifty?: boolean;
-  hundred?: boolean;
-  cards4?: {
-    type: "9" | "10" | "j" | "q" | "k" | "a",
-    value: number
-  }
-}
-
-type TeamData = {
+export type TeamData = {
   score: string,
-  adds: AddsType
-}
-
-type StateType = {
-  team1: TeamData,
-  team2: TeamData
-}
-
-const initialState: StateType = {
-  team1: {
-    score: "",
-    adds: {}
-  },
-  team2: {
-    score: "",
-    adds: {}
-  }
+  adds: string[]
 }
 
 export function FinishGameModal({ visible, rounds, onClose, onRecordScore, onConfirmFinish }: FinishGameModalProps) {
   const [isAX2Selected, setIsAX2Selected] = useState(false);
-  const [roundScore, setRoundScore] = useState(initialState);
+  const [team1Score, setTeam1Score] = useState<TeamData>({ score: "", adds: [] });
+  const [team2Score, setTeam2Score] = useState<TeamData>({ score: "", adds: [] });
+
+  const team1 = useTeamsStore(store => store.team1);
+  const team2 = useTeamsStore(store => store.team2);
 
   const currentRound = rounds.length > 0 ? rounds[rounds.length - 1] : null;
   const roundInfo = currentRound?.round;
 
   const handleRecordScore = () => {
-    // onRecordScore(team1Input, team2Input);
-    setRoundScore(initialState)
     setIsAX2Selected(false)
   };
 
-  const canRecord = roundScore.team1.score !== '' && roundScore.team2.score !== '';
+  const canRecord = team1Score.score !== '' && team2Score.score !== '';
 
   const updateScore = (team: "team1" | "team2", score: string) => {
-    const newScoreState = team === "team1"
-      ? {
-        team1: { score, adds: roundScore.team1.adds }
-      } : {
-        team2: { score, adds: roundScore.team2.adds }
+    if (team === "team1") {
+      setTeam1Score({ score, adds: team1Score.adds })
+    } else {
+      setTeam2Score({ score, adds: team2Score.adds })
+    }
+  }
+
+  const updateAdd = (team: "team1" | "team2", addKey: string) => {
+    if (team === "team1") {
+      if (!team1Score.adds.includes(addKey)) {
+        setTeam1Score({ score: team1Score.score, adds: [...team1Score.adds, addKey] })
+      } else {
+        setTeam1Score({ score: team1Score.score, adds: team1Score.adds.filter(item => item !== addKey) })
       }
-    setRoundScore((prev) => ({ ...prev, newScoreState }))
+    } else {
+      if (!team2Score.adds.includes(addKey)) {
+        setTeam2Score({ score: team2Score.score, adds: [...team2Score.adds, addKey] })
+      } else {
+        setTeam2Score({ score: team2Score.score, adds: team2Score.adds.filter(item => item !== addKey) })
+      }
+    }
   }
 
   return (
@@ -99,103 +88,33 @@ export function FinishGameModal({ visible, rounds, onClose, onRecordScore, onCon
           {/* Score Inputs */}
           <View style={styles.inputsContainer}>
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Team 1 Score</Text>
+              <Text style={styles.inputLabel}>{team1.name} Տարած</Text>
               <TextInput
                 style={styles.scoreInput}
-                value={roundScore.team1.score}
+                value={team1Score.score}
                 onChangeText={(value) => updateScore("team1", value)}
                 keyboardType="numeric"
                 placeholder="0"
                 placeholderTextColor="#4B5563"
                 maxLength={3}
               />
-              {/* Cards4 Dropdown for Team 1 */}
-              <View style={styles.dropdownContainer}>
-                <Pressable
-                  onPress={() => setShowTeam1Dropdown(!showTeam1Dropdown)}
-                  style={styles.dropdownButton}
-                >
-                  <Text style={styles.dropdownButtonText}>
-                    {team1Card ? Cards4.find(c => c.value === team1Card)?.name : 'Select Card'}
-                  </Text>
-                  <Text style={styles.dropdownArrow}>{showTeam1Dropdown ? '▲' : '▼'}</Text>
-                </Pressable>
-                {showTeam1Dropdown && (
-                  <View style={styles.dropdownMenu}>
-                    {Cards4.map((card) => (
-                      <Pressable
-                        key={card.name}
-                        onPress={() => {
-                          // setTeam1Card(card.value);
-                          setShowTeam1Dropdown(false);
-                        }}
-                        style={({ pressed }) => [
-                          styles.dropdownItem,
-                          team1Card === card.value && styles.dropdownItemSelected,
-                          pressed && styles.dropdownItemPressed,
-                        ]}
-                      >
-                        <Text style={[styles.dropdownItemText, team1Card === card.value && styles.dropdownItemTextSelected]}>
-                          {card.name} ({card.value})
-                        </Text>
-                      </Pressable>
-                    ))}
-                  </View>
-                )}
-              </View>
-              {/* Add Buttons */}
-              <AddButtons />
+              <AddButtons teamScore={team1Score} updateAdd={(adds) => updateAdd("team1", adds)} />
             </View>
             <View style={styles.vsDivider}>
               <Text style={styles.vsText}>VS</Text>
             </View>
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Team 2 Score</Text>
+              <Text style={styles.inputLabel}>{team2.name} Տարած</Text>
               <TextInput
                 style={styles.scoreInput}
-                value={roundScore.team2.score}
+                value={team2Score.score}
                 onChangeText={(value) => updateScore("team2", value)}
                 keyboardType="numeric"
                 placeholder="0"
                 placeholderTextColor="#4B5563"
                 maxLength={3}
               />
-              {/* Cards4 Dropdown for Team 2 */}
-              <View style={styles.dropdownContainer}>
-                <Pressable
-                  onPress={() => setShowTeam2Dropdown(!showTeam2Dropdown)}
-                  style={styles.dropdownButton}
-                >
-                  <Text style={styles.dropdownButtonText}>
-                    {team2Card ? Cards4.find(c => c.value === team2Card)?.name : 'Select Card'}
-                  </Text>
-                  <Text style={styles.dropdownArrow}>{showTeam2Dropdown ? '▲' : '▼'}</Text>
-                </Pressable>
-                {showTeam2Dropdown && (
-                  <View style={styles.dropdownMenu}>
-                    {Cards4.map((card) => (
-                      <Pressable
-                        key={card.name}
-                        onPress={() => {
-                          setTeam2Card(card.value);
-                          setShowTeam2Dropdown(false);
-                        }}
-                        style={({ pressed }) => [
-                          styles.dropdownItem,
-                          team2Card === card.value && styles.dropdownItemSelected,
-                          pressed && styles.dropdownItemPressed,
-                        ]}
-                      >
-                        <Text style={[styles.dropdownItemText, team2Card === card.value && styles.dropdownItemTextSelected]}>
-                          {card.name} ({card.value})
-                        </Text>
-                      </Pressable>
-                    ))}
-                  </View>
-                )}
-              </View>
-              {/* Add Buttons */}
-              <AddButtons />
+              <AddButtons teamScore={team2Score} updateAdd={(adds) => updateAdd("team2", adds)} />
             </View>
           </View>
 
@@ -328,70 +247,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textAlign: 'center',
     marginBottom: 8,
-  },
-  // Cards4 Dropdown Styles
-  dropdownContainer: {
-    position: 'relative',
-    width: 100,
-    marginBottom: 8,
-  },
-  dropdownButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#0F1F17',
-    borderWidth: 1,
-    borderColor: '#2B5A42',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-  },
-  dropdownButtonText: {
-    color: '#F8FAFC',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  dropdownArrow: {
-    color: '#9CA3AF',
-    fontSize: 10,
-    marginLeft: 4,
-  },
-  dropdownMenu: {
-    position: 'absolute',
-    top: '100%',
-    left: 0,
-    right: 0,
-    backgroundColor: '#0F1F17',
-    borderWidth: 1,
-    borderColor: '#2B5A42',
-    borderRadius: 8,
-    marginTop: 4,
-    zIndex: 1000,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-  },
-  dropdownItem: {
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#2B5A42',
-  },
-  dropdownItemSelected: {
-    backgroundColor: '#1E3A2B',
-  },
-  dropdownItemPressed: {
-    backgroundColor: '#2B5A42',
-  },
-  dropdownItemText: {
-    color: '#F8FAFC',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  dropdownItemTextSelected: {
-    color: '#4ADE80',
   },
   vsDivider: {
     paddingTop: 28,

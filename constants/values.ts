@@ -8,13 +8,6 @@ export const SUITS: Suit[] = [
   { symbol: 'A', name: 'Ace', color: '#F8FAFC', value: "ace" },
 ];
 
-export const Adds = [
-  { value: "2", name: "Թ" },
-  { value: "2", name: "Բ" },
-  { value: "5", name: "50" },
-  { value: "10", name: "100" },
-]
-
 export const Cards4 = [
   { value: "14", name: "9" },
   { value: "20", name: "J" },
@@ -23,3 +16,25 @@ export const Cards4 = [
   { value: "10", name: "A" },
 ]
 
+export const Adds = [
+  {
+    name: "Բլոտ",
+    key: "blote",
+    value: "2"
+  },
+  {
+    name: "Թերզ",
+    key: "terz",
+    value: "2",
+  },
+  {
+    name: "50",
+    key: "fifty",
+    value: "5",
+  },
+  {
+    name: "100",
+    key: "hundred",
+    value: "10"
+  },
+]
