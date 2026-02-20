@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Adds, Cards4 } from '@/constants/values';
-import { TeamData } from './finish-game-modal';
+interface TeamData {
+  score: string;
+  adds: string[];
+}
 
 interface AddButtonsProps {
   teamScore: TeamData;
@@ -48,18 +51,19 @@ export function AddButtons({ teamScore, updateAdd }: AddButtonsProps) {
       {/* Add Buttons */}
 
       <View style={styles.addButtonsRow}>
-        {Adds.map(add => (
-          <Pressable
-            key={add.key}
-            onPress={() => updateAdd(add.key)}
-            style={({ pressed }) => [
-              styles.addButton,
-              teamScore.adds.includes(add.key) && styles.addButtonSelected,
-              pressed && styles.addButtonPressed,
-            ]}
-          >
-            <Text style={styles.addButtonText}>{add.name}</Text>
-          </Pressable>
+        {Adds.map((add, index) => (
+          <View key={index} style={styles.addButtonWrapper}>
+            <Pressable
+              onPress={() => updateAdd(add.key)}
+              style={({ pressed }) => [
+                styles.addButton,
+                teamScore.adds.includes(add.key) && styles.addButtonSelected,
+                pressed && styles.addButtonPressed,
+              ]}
+            >
+              <Text style={styles.addButtonText}>{add.name}</Text>
+            </Pressable>
+          </View>
         ))}
       </View>
     </View>
@@ -139,17 +143,19 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 8,
     marginTop: 8,
-    justifyContent: 'center',
-    maxWidth: 120,
+    width: 136,
+  },
+  addButtonWrapper: {
+    width: 64,
+    height: 44,
   },
   addButton: {
     backgroundColor: '#0F1F17',
     borderWidth: 1,
     borderColor: '#2B5A42',
     borderRadius: 8,
-    minWidth: 50,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    width: '100%',
+    height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
   },
