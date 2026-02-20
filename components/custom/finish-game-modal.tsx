@@ -15,13 +15,14 @@ interface FinishGameModalProps {
 
 export type TeamData = {
   score: string,
-  adds: string[]
+  adds: string[],
+  cards4: string[]
 }
 
 export function FinishGameModal({ visible, rounds, onClose, onRecordScore, onConfirmFinish }: FinishGameModalProps) {
   const [isAX2Selected, setIsAX2Selected] = useState(false);
-  const [team1Score, setTeam1Score] = useState<TeamData>({ score: "", adds: [] });
-  const [team2Score, setTeam2Score] = useState<TeamData>({ score: "", adds: [] });
+  const [team1Score, setTeam1Score] = useState<TeamData>({ score: "", adds: [], cards4: [] });
+  const [team2Score, setTeam2Score] = useState<TeamData>({ score: "", adds: [], cards4: [] });
 
   const team1 = useTeamsStore(store => store.team1);
   const team2 = useTeamsStore(store => store.team2);
@@ -31,33 +32,55 @@ export function FinishGameModal({ visible, rounds, onClose, onRecordScore, onCon
 
   const handleRecordScore = () => {
     setIsAX2Selected(false)
+
+    setTeam1Score({ score: "", adds: [], cards4: [] })
+    setTeam2Score({ score: "", adds: [], cards4: [] })
+
+    onRecordScore(team1Score.score, team2Score.score)
   };
 
   const canRecord = team1Score.score !== '' && team2Score.score !== '';
 
   const updateScore = (team: "team1" | "team2", score: string) => {
     if (team === "team1") {
-      setTeam1Score({ score, adds: team1Score.adds })
+      setTeam1Score({ ...team1Score, score })
     } else {
-      setTeam2Score({ score, adds: team2Score.adds })
+      setTeam2Score({ ...team2Score, score })
     }
   }
 
   const updateAdd = (team: "team1" | "team2", addKey: string) => {
     if (team === "team1") {
       if (!team1Score.adds.includes(addKey)) {
-        setTeam1Score({ score: team1Score.score, adds: [...team1Score.adds, addKey] })
+        setTeam1Score({ ...team1Score, adds: [...team1Score.adds, addKey] })
       } else {
-        setTeam1Score({ score: team1Score.score, adds: team1Score.adds.filter(item => item !== addKey) })
+        setTeam1Score({ ...team1Score, adds: team1Score.adds.filter(item => item !== addKey) })
       }
     } else {
       if (!team2Score.adds.includes(addKey)) {
-        setTeam2Score({ score: team2Score.score, adds: [...team2Score.adds, addKey] })
+        setTeam2Score({ ...team2Score, adds: [...team2Score.adds, addKey] })
       } else {
-        setTeam2Score({ score: team2Score.score, adds: team2Score.adds.filter(item => item !== addKey) })
+        setTeam2Score({ ...team2Score, adds: team2Score.adds.filter(item => item !== addKey) })
       }
     }
   }
+
+  const updateCards4 = (team: "team1" | "team2", addKey: string) => {
+    if (team === "team1") {
+      if (!team1Score.cards4.includes(addKey)) {
+        setTeam1Score({ ...team1Score, cards4: [...team1Score.cards4, addKey] })
+      } else {
+        setTeam1Score({ ...team1Score, cards4: team1Score.cards4.filter(item => item !== addKey) })
+      }
+    } else {
+      if (!team2Score.cards4.includes(addKey)) {
+        setTeam2Score({ ...team2Score, cards4: [...team2Score.cards4, addKey] })
+      } else {
+        setTeam2Score({ ...team2Score, cards4: team2Score.cards4.filter(item => item !== addKey) })
+      }
+    }
+  }
+
 
   return (
     <Modal
@@ -68,6 +91,16 @@ export function FinishGameModal({ visible, rounds, onClose, onRecordScore, onCon
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
+          {/* Selected Team Display */}
+          {roundInfo?.selectedTeam && (
+            <View style={styles.selectedTeamContainer}>
+              <Text style={styles.selectedTeamLabel}>Խաղացող թիմ</Text>
+              <Text style={styles.selectedTeamName}>
+                {roundInfo.selectedTeam === 'team1' ? team1.name : team2.name}
+              </Text>
+            </View>
+          )}
+
           {/* Round Badge with A X2 Button */}
           {roundInfo && (
             <View style={styles.roundBadgeContainer}>
@@ -98,7 +131,7 @@ export function FinishGameModal({ visible, rounds, onClose, onRecordScore, onCon
                 placeholderTextColor="#4B5563"
                 maxLength={3}
               />
-              <AddButtons teamScore={team1Score} updateAdd={(adds) => updateAdd("team1", adds)} />
+              <AddButtons teamScore={team1Score} updateAdd={(adds) => updateAdd("team1", adds)} updateCards4={(addKey) => updateCards4("team1", addKey)} />
             </View>
             <View style={styles.vsDivider}>
               <Text style={styles.vsText}>VS</Text>
@@ -114,16 +147,16 @@ export function FinishGameModal({ visible, rounds, onClose, onRecordScore, onCon
                 placeholderTextColor="#4B5563"
                 maxLength={3}
               />
-              <AddButtons teamScore={team2Score} updateAdd={(adds) => updateAdd("team2", adds)} />
+              <AddButtons teamScore={team2Score} updateAdd={(adds) => updateAdd("team2", adds)} updateCards4={(addKey) => updateCards4("team2", addKey)} />
             </View>
           </View>
 
-          {/* Action Buttons */}
-          <View style={styles.buttonsRow}>
+          {/* Action Buttons Row - Aligned with input groups */}
+          <View style={styles.bottomButtonsRow}>
             <Pressable
               onPress={onClose}
               style={({ pressed }) => [
-                styles.actionButton,
+                styles.bottomButton,
                 styles.cancelButton,
                 pressed && styles.actionButtonPressed,
               ]}
@@ -134,7 +167,7 @@ export function FinishGameModal({ visible, rounds, onClose, onRecordScore, onCon
               onPress={handleRecordScore}
               disabled={!canRecord}
               style={({ pressed }) => [
-                styles.actionButton,
+                styles.bottomButton,
                 styles.recordButton,
                 !canRecord && styles.recordButtonDisabled,
                 pressed && canRecord && styles.actionButtonPressed,
@@ -145,19 +178,6 @@ export function FinishGameModal({ visible, rounds, onClose, onRecordScore, onCon
               </Text>
             </Pressable>
           </View>
-
-          {/* Finish Game Option */}
-          {rounds.length > 0 && rounds[rounds.length - 1].team1 !== '' && (
-            <Pressable
-              onPress={onConfirmFinish}
-              style={({ pressed }) => [
-                styles.finishGameButton,
-                pressed && styles.actionButtonPressed,
-              ]}
-            >
-              <Text style={styles.finishGameText}>End Game & View Results</Text>
-            </Pressable>
-          )}
         </View>
       </View>
     </Modal>
@@ -313,5 +333,41 @@ const styles = StyleSheet.create({
   actionButtonPressed: {
     opacity: 0.85,
     transform: [{ scale: 0.98 }],
+  },
+  bottomButtonsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    justifyContent: 'center',
+    marginTop: 8,
+    width: '100%',
+  },
+  bottomButton: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  selectedTeamContainer: {
+    backgroundColor: '#0F1F17',
+    borderWidth: 1,
+    borderColor: '#4ADE80',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginBottom: 12,
+    alignItems: 'center',
+  },
+  selectedTeamLabel: {
+    color: '#9CA3AF',
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  selectedTeamName: {
+    color: '#4ADE80',
+    fontSize: 16,
+    fontWeight: '700',
   },
 });

@@ -71,6 +71,7 @@ export default function ScoreScreen() {
       return newRounds;
     });
     closeFinishModal();
+    setGameStarted(false);
   }
 
   const { team1, team2 } = useTeamsStore();
@@ -119,34 +120,57 @@ export default function ScoreScreen() {
       />
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-        {/* Table Header */}
-        <View style={styles.tableHeader}>
-          <Text style={[styles.headerCell, styles.roundCell]}>Խոսացած</Text>
-          <Text style={[styles.headerCell, styles.scoreCell]}>{team1.name}</Text>
-          <Text style={[styles.headerCell, styles.scoreCell]}>{team2.name}</Text>
+        {/* Grid Header */}
+        <View style={styles.gridHeader}>
+          <Text style={styles.gridHeaderCell}>Խոսացած</Text>
+          <Text style={styles.gridHeaderCell}>{team1.name}</Text>
+          <Text style={styles.gridHeaderCell}>{team2.name}</Text>
         </View>
 
-        {/* Table Rows */}
+        {/* Grid Rows */}
         {rounds?.map((item, index) => (
           <View
             key={index}
             style={[
-              styles.tableRow,
-              index % 2 !== 0 && styles.tableRowEven,
+              styles.gridRow,
+              index % 2 !== 0 && styles.gridRowEven,
             ]}
           >
-            <View style={[styles.roundCell, styles.roundCellContainer]}>
+            <View style={styles.gridCell}>
               <RoundBadge round={item.round} />
             </View>
-            <Text style={[styles.cell, styles.scoreCell, styles.scoreCellNonEditable]}>
-              {item.team1}
-            </Text>
-            <Text style={[styles.cell, styles.scoreCell, styles.scoreCellNonEditable]}>
-              {item.team2}
-            </Text>
+            <View style={styles.gridCell}>
+              <Text style={styles.gridCellText}>{item.team1}</Text>
+            </View>
+            <View style={styles.gridCell}>
+              <Text style={styles.gridCellText}>{item.team2}</Text>
+            </View>
           </View>
         ))}
       </ScrollView>
+
+      {/* Final Score Footer - Sticky Bottom */}
+      {rounds.length > 0 && (
+        <View style={styles.finalScoreContainer}>
+          <View style={styles.finalScoreRow}>
+            <View style={styles.finalScoreItem}>
+              <Text style={styles.finalScoreLabel}>{team1.name}</Text>
+              <Text style={styles.finalScoreValue}>
+                {rounds.reduce((sum, round) => sum + (parseInt(round.team1) || 0), 0)}
+              </Text>
+            </View>
+            <View style={styles.finalScoreDivider}>
+              <Text style={styles.finalScoreVs}>VS</Text>
+            </View>
+            <View style={styles.finalScoreItem}>
+              <Text style={styles.finalScoreLabel}>{team2.name}</Text>
+              <Text style={styles.finalScoreValue}>
+                {rounds.reduce((sum, round) => sum + (parseInt(round.team2) || 0), 0)}
+              </Text>
+            </View>
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -219,7 +243,8 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 24,
   },
-  tableHeader: {
+  // Grid Styles
+  gridHeader: {
     flexDirection: 'row',
     backgroundColor: '#1E3A2B',
     borderWidth: 1,
@@ -229,14 +254,16 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 8,
   },
-  headerCell: {
+  gridHeaderCell: {
     color: '#9CA3AF',
     fontSize: 14,
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+    flex: 1,
+    textAlign: 'center',
   },
-  tableRow: {
+  gridRow: {
     flexDirection: 'row',
     alignItems: 'center',
     borderLeftWidth: 1,
@@ -246,41 +273,75 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 8,
   },
-  tableRowEven: {
+  gridRowEven: {
     backgroundColor: '#0F1F17',
   },
-  cell: {
-    color: '#F8FAFC',
-    fontSize: 16,
-  },
-  roundCell: {
-    flex: 1,
-  },
-  scoreCell: {
-    flex: 1.5,
-    textAlign: 'center',
-  },
-  scoreInput: {
-    backgroundColor: '#0F1F17',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#2B5A42',
-    paddingVertical: 6,
-    paddingHorizontal: 8,
-    marginHorizontal: 4,
-  },
-  scoreCellNonEditable: {
-    paddingVertical: 6,
-    paddingHorizontal: 8,
-    marginHorizontal: 4,
-    textAlign: 'center',
-  },
-  // Beautiful round cell styles
-  roundCellContainer: {
+  gridCell: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 8,
-    minWidth: 0,
+  },
+  gridCellText: {
+    color: '#F8FAFC',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  // Final Score Footer Styles - Matching app UI/UX
+  finalScoreContainer: {
+    backgroundColor: '#1E3A2B',
+    borderTopWidth: 1,
+    borderTopColor: '#2B5A42',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    marginHorizontal: 10,
+    marginBottom: 10,
+  },
+  finalScoreRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 24,
+  },
+  finalScoreItem: {
+    alignItems: 'center',
+    backgroundColor: '#0F1F17',
+    borderWidth: 1,
+    borderColor: '#2B5A42',
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    minWidth: 100,
+  },
+  finalScoreLabel: {
+    color: '#9CA3AF',
+    fontSize: 11,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 6,
+  },
+  finalScoreValue: {
+    color: '#4ADE80',
+    fontSize: 32,
+    fontWeight: '700',
+  },
+  finalScoreDivider: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  finalScoreVs: {
+    color: '#2B5A42',
+    fontSize: 12,
+    fontWeight: '700',
+    backgroundColor: '#0F1F17',
+    borderWidth: 1,
+    borderColor: '#2B5A42',
+    borderRadius: 20,
+    width: 36,
+    height: 36,
+    textAlign: 'center',
+    lineHeight: 34,
   },
 });

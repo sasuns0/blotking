@@ -8,33 +8,39 @@ export const SUITS: Suit[] = [
   { symbol: 'A', name: 'Ace', color: '#F8FAFC', value: "ace" },
 ];
 
-export const Cards4 = [
-  { value: "14", name: "9" },
-  { value: "20", name: "J" },
-  { value: "10", name: "Q" },
-  { value: "10", name: "K" },
-  { value: "10", name: "A" },
-]
+export const Cards4: {
+  [key: string]: {
+    name: string,
+    value: string
+  }
+} = {
+  "9": { value: "14", name: "9" },
+  "j": { value: "20", name: "J" },
+  "q": { value: "10", name: "Q" },
+  "k": { value: "10", name: "K" },
+  "a": { value: "10", name: "A" },
+}
 
-export const Adds = [
-  {
+export const Adds: {
+  [key: string]: {
+    name: string,
+    value: string
+  }
+} = {
+  "blote": {
     name: "Բլոտ",
-    key: "blote",
     value: "2"
   },
-  {
+  "terz": {
     name: "Թերզ",
-    key: "terz",
     value: "2",
   },
-  {
+  "fifty": {
     name: "50",
-    key: "fifty",
     value: "5",
   },
-  {
+  "hundred": {
     name: "100",
-    key: "hundred",
     value: "10"
   },
-]
+}

@@ -1,70 +1,67 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Adds, Cards4 } from '@/constants/values';
-interface TeamData {
-  score: string;
-  adds: string[];
-}
+import { TeamData } from './finish-game-modal';
 
 interface AddButtonsProps {
   teamScore: TeamData;
   updateAdd: (addKey: string) => void
+  updateCards4: (addKey: string) => void
 }
 
-export function AddButtons({ teamScore, updateAdd }: AddButtonsProps) {
+export function AddButtons({ teamScore, updateAdd, updateCards4 }: AddButtonsProps) {
   const [showDropdown, setShowDropdown] = useState(false);
 
   return (
     <View style={styles.container}>
-      {/* Cards4 Dropdown */}
-      {/* <View style={styles.dropdownContainer}> */}
-      {/*   <Pressable */}
-      {/*     onPress={() => setShowDropdown(!showDropdown)} */}
-      {/*     style={styles.dropdownButton} */}
-      {/*   > */}
-      {/*     <Text style={styles.dropdownButtonText}> */}
-      {/*       {selectedCard ? Cards4.find(c => c.value === selectedCard)?.name : 'Select Card'} */}
-      {/*     </Text> */}
-      {/*     <Text style={styles.dropdownArrow}>{showDropdown ? '▲' : '▼'}</Text> */}
-      {/*   </Pressable> */}
-      {/*   {showDropdown && ( */}
-      {/*     <View style={styles.dropdownMenu}> */}
-      {/*       {Cards4.map((card) => ( */}
-      {/*         <Pressable */}
-      {/*           key={card.name} */}
-      {/*           onPress={() => handleCardSelect(card.value)} */}
-      {/*           style={({ pressed }) => [ */}
-      {/*             styles.dropdownItem, */}
-      {/*             selectedCard === card.value && styles.dropdownItemSelected, */}
-      {/*             pressed && styles.dropdownItemPressed, */}
-      {/*           ]} */}
-      {/*         > */}
-      {/*           <Text style={[styles.dropdownItemText, selectedCard === card.value && styles.dropdownItemTextSelected]}> */}
-      {/*             {card.name} ({card.value}) */}
-      {/*           </Text> */}
-      {/*         </Pressable> */}
-      {/*       ))} */}
-      {/*     </View> */}
-      {/*   )} */}
-      {/* </View> */}
-
       {/* Add Buttons */}
-
       <View style={styles.addButtonsRow}>
-        {Adds.map((add, index) => (
-          <View key={index} style={styles.addButtonWrapper}>
+        {Object.keys(Adds).map((key) => (
+          <View key={key} style={styles.addButtonWrapper}>
             <Pressable
-              onPress={() => updateAdd(add.key)}
+              onPress={() => updateAdd(key)}
               style={({ pressed }) => [
                 styles.addButton,
-                teamScore.adds.includes(add.key) && styles.addButtonSelected,
+                teamScore.adds.includes(key) && styles.addButtonSelected,
                 pressed && styles.addButtonPressed,
               ]}
             >
-              <Text style={styles.addButtonText}>{add.name}</Text>
+              <Text style={styles.addButtonText}>{Adds[key].name}</Text>
             </Pressable>
           </View>
         ))}
+
+        {/* Cards4 Dropdown */}
+        <View style={styles.dropdownContainer}>
+          <Pressable
+            onPress={() => setShowDropdown(!showDropdown)}
+            style={styles.dropdownButton}
+          >
+            <Text style={styles.dropdownButtonText}>
+              {teamScore.cards4.length > 0 ? teamScore.cards4.join(", ") : '4 Թուղթ'}
+            </Text>
+            <Text style={styles.dropdownArrow}>{showDropdown ? '▲' : '▼'}</Text>
+          </Pressable>
+          {showDropdown && (
+            <View style={styles.dropdownMenu}>
+              {Object.keys(Cards4).map((card) => (
+                <Pressable
+                  key={card}
+                  onPress={() => updateCards4(card)}
+                  style={({ pressed }) => [
+                    styles.dropdownItem,
+                    pressed && styles.dropdownItemPressed,
+                  ]}
+                >
+                  <Text style={[styles.dropdownItemText]}>
+                    {Cards4[card].name} ({Cards4[card].value})
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          )}
+        </View>
+
       </View>
     </View>
   );
@@ -77,7 +74,7 @@ const styles = StyleSheet.create({
   },
   dropdownContainer: {
     position: 'relative',
-    width: 100,
+    width: 136,
     marginBottom: 8,
   },
   dropdownButton: {
