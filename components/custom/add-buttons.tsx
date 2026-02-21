@@ -53,10 +53,14 @@ export function AddButtons({ teamScore, updateAdd, updateCards4 }: AddButtonsPro
                   onPress={() => updateCards4(card)}
                   style={({ pressed }) => [
                     styles.dropdownItem,
+                    teamScore.cards4.includes(card) && styles.dropdownItemSelected,
                     pressed && styles.dropdownItemPressed,
                   ]}
                 >
-                  <Text style={[styles.dropdownItemText]}>
+                  <Text style={[
+                    styles.dropdownItemText,
+                    teamScore.cards4.includes(card) && styles.dropdownItemTextSelected,
+                  ]}>
                     {Cards4[card].name} ({Cards4[card].value})
                   </Text>
                 </Pressable>
