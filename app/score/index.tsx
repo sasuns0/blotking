@@ -103,7 +103,7 @@ export default function ScoreScreen() {
             ]}
           >
             <Text style={styles.startButtonText}>
-              {isGameStarted ? 'Ավարտել' : 'Սկսել'}
+              {isGameStarted ? 'Գրել' : 'Սկսել'}
             </Text>
           </Pressable>
         </View>
@@ -215,7 +215,8 @@ const styles = StyleSheet.create({
   },
   title: {
     marginBottom: 0,
-    lineHeight: 36,
+    lineHeight: 32,
+    fontSize: 20,
   },
   startButton: {
     backgroundColor: '#2B5A42',
@@ -234,7 +235,7 @@ const styles = StyleSheet.create({
   },
   startButtonText: {
     color: '#F8FAFC',
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
   },
   scroll: {
