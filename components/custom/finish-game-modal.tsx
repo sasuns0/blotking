@@ -4,6 +4,7 @@ import { Round, Score } from '@/app/score';
 import { RoundBadge } from '@/components/custom/round-badge';
 import { AddButtons } from '@/components/custom/add-buttons';
 import { useTeamsStore } from '@/store/teamsStore';
+import { AddKey } from '@/constants/values';
 
 interface FinishGameModalProps {
   visible: boolean;
@@ -15,14 +16,14 @@ interface FinishGameModalProps {
 
 export type TeamData = {
   score: string,
-  adds: string[],
+  adds: Partial<Record<AddKey, number>>,
   cards4: string[]
 }
 
 export function FinishGameModal({ visible, rounds, onClose, onRecordScore, onConfirmFinish }: FinishGameModalProps) {
   const [isAX2Selected, setIsAX2Selected] = useState(false);
-  const [team1Score, setTeam1Score] = useState<TeamData>({ score: "", adds: [], cards4: [] });
-  const [team2Score, setTeam2Score] = useState<TeamData>({ score: "", adds: [], cards4: [] });
+  const [team1Score, setTeam1Score] = useState<TeamData>({ score: "", adds: {}, cards4: [] });
+  const [team2Score, setTeam2Score] = useState<TeamData>({ score: "", adds: {}, cards4: [] });
 
   const team1 = useTeamsStore(store => store.team1);
   const team2 = useTeamsStore(store => store.team2);
@@ -33,8 +34,8 @@ export function FinishGameModal({ visible, rounds, onClose, onRecordScore, onCon
   const handleRecordScore = () => {
     setIsAX2Selected(false)
 
-    setTeam1Score({ score: "", adds: [], cards4: [] })
-    setTeam2Score({ score: "", adds: [], cards4: [] })
+    setTeam1Score({ score: "", adds: {}, cards4: [] })
+    setTeam2Score({ score: "", adds: {}, cards4: [] })
 
     onRecordScore(team1Score.score, team2Score.score)
   };
@@ -49,18 +50,22 @@ export function FinishGameModal({ visible, rounds, onClose, onRecordScore, onCon
     }
   }
 
-  const updateAdd = (team: "team1" | "team2", addKey: string) => {
+  const updateAdd = (team: "team1" | "team2", addKey: AddKey, count: number) => {
     if (team === "team1") {
-      if (!team1Score.adds.includes(addKey)) {
-        setTeam1Score({ ...team1Score, adds: [...team1Score.adds, addKey] })
+      if (!team1Score.adds[addKey]) {
+        setTeam1Score({ ...team1Score, adds: { ...team1Score.adds, [addKey]: count } })
       } else {
-        setTeam1Score({ ...team1Score, adds: team1Score.adds.filter(item => item !== addKey) })
+        const team1Adds = team1Score.adds;
+        delete team1Adds[addKey];
+        setTeam1Score({ ...team1Score, adds: team1Adds })
       }
     } else {
-      if (!team2Score.adds.includes(addKey)) {
-        setTeam2Score({ ...team2Score, adds: [...team2Score.adds, addKey] })
+      if (!team2Score.adds[addKey]) {
+        setTeam2Score({ ...team2Score, adds: { ...team2Score.adds, [addKey]: count } })
       } else {
-        setTeam2Score({ ...team2Score, adds: team2Score.adds.filter(item => item !== addKey) })
+        const team2Adds = team2Score.adds;
+        delete team2Adds[addKey];
+        setTeam2Score({ ...team2Score, adds: team2Adds })
       }
     }
   }
@@ -131,7 +136,7 @@ export function FinishGameModal({ visible, rounds, onClose, onRecordScore, onCon
                 placeholderTextColor="#4B5563"
                 maxLength={3}
               />
-              <AddButtons teamScore={team1Score} updateAdd={(adds) => updateAdd("team1", adds)} updateCards4={(addKey) => updateCards4("team1", addKey)} />
+              <AddButtons teamScore={team1Score} updateAdd={(adds, count) => updateAdd("team1", adds, count)} updateCards4={(addKey) => updateCards4("team1", addKey)} />
             </View>
             <View style={styles.vsDivider}>
               <Text style={styles.vsText}>VS</Text>
@@ -147,7 +152,7 @@ export function FinishGameModal({ visible, rounds, onClose, onRecordScore, onCon
                 placeholderTextColor="#4B5563"
                 maxLength={3}
               />
-              <AddButtons teamScore={team2Score} updateAdd={(adds) => updateAdd("team2", adds)} updateCards4={(addKey) => updateCards4("team2", addKey)} />
+              <AddButtons teamScore={team2Score} updateAdd={(adds, count) => updateAdd("team2", adds, count)} updateCards4={(addKey) => updateCards4("team2", addKey)} />
             </View>
           </View>
 

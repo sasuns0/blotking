@@ -1,46 +1,49 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Adds, Cards4 } from '@/constants/values';
+import { AddKey, Adds, Cards4 } from '@/constants/values';
 import { TeamData } from './finish-game-modal';
+import { AddCounterButton } from './add-counter-button';
 
 interface AddButtonsProps {
   teamScore: TeamData;
-  updateAdd: (addKey: string) => void
+  updateAdd: (addKey: AddKey, count: number) => void
   updateCards4: (addKey: string) => void
 }
 
 export function AddButtons({ teamScore, updateAdd, updateCards4 }: AddButtonsProps) {
   const [showDropdown, setShowDropdown] = useState(false);
+  const addKeys = Object.keys(Adds) as AddKey[];
+
+  let card4Names = "";
+  teamScore.cards4.forEach(item => {
+    card4Names += `${Cards4[item].name}, `
+  })
 
   return (
     <View style={styles.container}>
       {/* Add Buttons */}
       <View style={styles.addButtonsRow}>
-        {Object.keys(Adds).map((key) => (
-          <View key={key} style={styles.addButtonWrapper}>
-            <Pressable
-              onPress={() => updateAdd(key)}
-              style={({ pressed }) => [
-                styles.addButton,
-                teamScore.adds.includes(key) && styles.addButtonSelected,
-                pressed && styles.addButtonPressed,
-              ]}
-            >
-              <Text style={styles.addButtonText}>{Adds[key].name}</Text>
-            </Pressable>
-          </View>
+        {addKeys.map((key) => (
+          <AddCounterButton
+            key={key}
+            addKey={key}
+            updateAdd={updateAdd}
+            adds={teamScore.adds}
+          />
         ))}
 
         {/* Cards4 Dropdown */}
         <View style={styles.dropdownContainer}>
           <Pressable
             onPress={() => setShowDropdown(!showDropdown)}
-            style={styles.dropdownButton}
+            style={[
+              styles.dropdownButton,
+              teamScore.cards4.length > 0 && styles.addButtonSelected,
+            ]}
           >
             <Text style={styles.dropdownButtonText}>
-              {teamScore.cards4.length > 0 ? teamScore.cards4.join(", ") : '4 Թուղթ'}
+              {teamScore.cards4.length > 0 ? card4Names : '4 Թուղթ'}
             </Text>
-            <Text style={styles.dropdownArrow}>{showDropdown ? '▲' : '▼'}</Text>
           </Pressable>
           {showDropdown && (
             <View style={styles.dropdownMenu}>
@@ -63,7 +66,7 @@ export function AddButtons({ teamScore, updateAdd, updateCards4 }: AddButtonsPro
         </View>
 
       </View>
-    </View>
+    </View >
   );
 }
 

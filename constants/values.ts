@@ -21,12 +21,9 @@ export const Cards4: {
   "a": { value: "10", name: "A" },
 }
 
-export const Adds: {
-  [key: string]: {
-    name: string,
-    value: string
-  }
-} = {
+export type AddKey = "blote" | "terz" | "fifty" | "hundred"
+
+export const Adds: Record<AddKey, { name: string, value: string }> = {
   "blote": {
     name: "Բլոտ",
     value: "2"
