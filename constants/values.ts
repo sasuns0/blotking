@@ -11,33 +11,33 @@ export const SUITS: Suit[] = [
 export const Cards4: {
   [key: string]: {
     name: string,
-    value: string
+    value: number
   }
 } = {
-  "9": { value: "14", name: "9" },
-  "j": { value: "20", name: "J" },
-  "q": { value: "10", name: "Q" },
-  "k": { value: "10", name: "K" },
-  "a": { value: "10", name: "A" },
+  "9": { value: 14, name: "9" },
+  "j": { value: 20, name: "J" },
+  "q": { value: 10, name: "Q" },
+  "k": { value: 10, name: "K" },
+  "a": { value: 10, name: "A" },
 }
 
 export type AddKey = "blote" | "terz" | "fifty" | "hundred"
 
-export const Adds: Record<AddKey, { name: string, value: string }> = {
+export const Adds: Record<AddKey, { name: string, value: number }> = {
   "blote": {
     name: "Բլոտ",
-    value: "2"
+    value: 2
   },
   "terz": {
     name: "Թերզ",
-    value: "2",
+    value: 2,
   },
   "fifty": {
     name: "50",
-    value: "5",
+    value: 5,
   },
   "hundred": {
     name: "100",
-    value: "10"
+    value: 10
   },
 }

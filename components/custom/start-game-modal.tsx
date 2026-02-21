@@ -66,6 +66,8 @@ export function StartGameModal({ visible, onClose, onScoreSubmit }: StartGameMod
       return
     }
 
+    setScore(initialFormState);
+
     onScoreSubmit({
       suit: score.selectedSuit,
       number: score.roundNumber,

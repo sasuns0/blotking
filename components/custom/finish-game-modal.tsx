@@ -5,13 +5,13 @@ import { RoundBadge } from '@/components/custom/round-badge';
 import { AddButtons } from '@/components/custom/add-buttons';
 import { useTeamsStore } from '@/store/teamsStore';
 import { AddKey } from '@/constants/values';
+import { calculateStore } from '@/utils/calculateScore';
 
 interface FinishGameModalProps {
   visible: boolean;
   rounds: Score[];
   onClose: () => void;
   onRecordScore: (team1Score: string, team2Score: string) => void;
-  onConfirmFinish: () => void;
 }
 
 export type TeamData = {
@@ -20,7 +20,7 @@ export type TeamData = {
   cards4: string[]
 }
 
-export function FinishGameModal({ visible, rounds, onClose, onRecordScore, onConfirmFinish }: FinishGameModalProps) {
+export function FinishGameModal({ visible, rounds, onClose, onRecordScore }: FinishGameModalProps) {
   const [isAX2Selected, setIsAX2Selected] = useState(false);
   const [team1Score, setTeam1Score] = useState<TeamData>({ score: "", adds: {}, cards4: [] });
   const [team2Score, setTeam2Score] = useState<TeamData>({ score: "", adds: {}, cards4: [] });
@@ -34,10 +34,17 @@ export function FinishGameModal({ visible, rounds, onClose, onRecordScore, onCon
   const handleRecordScore = () => {
     setIsAX2Selected(false)
 
+    if (!currentRound) {
+      return
+    }
+
+    let team1FinalScore = calculateStore(team1Score, currentRound, "team1").toString();
+    let team2FinalScore = calculateStore(team2Score, currentRound, "team2").toString();
+
     setTeam1Score({ score: "", adds: {}, cards4: [] })
     setTeam2Score({ score: "", adds: {}, cards4: [] })
 
-    onRecordScore(team1Score.score, team2Score.score)
+    onRecordScore(team1FinalScore, team2FinalScore)
   };
 
   const canRecord = team1Score.score !== '' && team2Score.score !== '';
@@ -86,13 +93,19 @@ export function FinishGameModal({ visible, rounds, onClose, onRecordScore, onCon
     }
   }
 
+  const handleClose = () => {
+    setTeam1Score({ score: "", adds: {}, cards4: [] })
+    setTeam2Score({ score: "", adds: {}, cards4: [] })
+
+    onClose()
+  }
 
   return (
     <Modal
       animationType="fade"
       transparent={true}
       visible={visible}
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
@@ -159,7 +172,7 @@ export function FinishGameModal({ visible, rounds, onClose, onRecordScore, onCon
           {/* Action Buttons Row - Aligned with input groups */}
           <View style={styles.bottomButtonsRow}>
             <Pressable
-              onPress={onClose}
+              onPress={handleClose}
               style={({ pressed }) => [
                 styles.bottomButton,
                 styles.cancelButton,

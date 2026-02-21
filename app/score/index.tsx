@@ -24,12 +24,14 @@ export type Score = {
   team2: string
 }
 
+export type TeamType = "team1" | "team2"
+
 export type Round = {
   suit: SuitType,
   number: number,
   isQuanshed: boolean,
   isSured: boolean,
-  selectedTeam?: 'team1' | 'team2'
+  selectedTeam?: TeamType
 }
 
 export default function ScoreScreen() {
@@ -47,11 +49,6 @@ export default function ScoreScreen() {
     setRounds([...rounds, { round, team1: '', team2: '' }])
     setGameStarted(true)
     closeModal()
-  }
-
-  const handleConfirmFinish = () => {
-    setGameStarted(false);
-    closeFinishModal();
   }
 
   const getSuiteByValue = (value: SuitType) => {
@@ -116,7 +113,6 @@ export default function ScoreScreen() {
         rounds={rounds}
         onClose={closeFinishModal}
         onRecordScore={onRecordScore}
-        onConfirmFinish={handleConfirmFinish}
       />
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
