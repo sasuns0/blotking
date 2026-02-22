@@ -17,13 +17,13 @@ interface FinishGameModalProps {
 export type TeamData = {
   score: string,
   adds: Partial<Record<AddKey, number>>,
-  cards4: string[]
+  cards4: string
 }
 
 export function FinishGameModal({ visible, rounds, onClose, onRecordScore }: FinishGameModalProps) {
   const [isAX2Selected, setIsAX2Selected] = useState(false);
-  const [team1Score, setTeam1Score] = useState<TeamData>({ score: "", adds: {}, cards4: [] });
-  const [team2Score, setTeam2Score] = useState<TeamData>({ score: "", adds: {}, cards4: [] });
+  const [team1Score, setTeam1Score] = useState<TeamData>({ score: "", adds: {}, cards4: '' });
+  const [team2Score, setTeam2Score] = useState<TeamData>({ score: "", adds: {}, cards4: '' });
 
   const team1 = useTeamsStore(store => store.team1);
   const team2 = useTeamsStore(store => store.team2);
@@ -38,13 +38,12 @@ export function FinishGameModal({ visible, rounds, onClose, onRecordScore }: Fin
       return
     }
 
-    let team1FinalScore = calculateStore(team1Score, currentRound, "team1").toString();
-    let team2FinalScore = calculateStore(team2Score, currentRound, "team2").toString();
+    const [team1FinalScore, team2FinalScore] = calculateStore(team1Score, team2Score, currentRound, isAX2Selected);
 
-    setTeam1Score({ score: "", adds: {}, cards4: [] })
-    setTeam2Score({ score: "", adds: {}, cards4: [] })
+    setTeam1Score({ score: "", adds: {}, cards4: '' })
+    setTeam2Score({ score: "", adds: {}, cards4: '' })
 
-    onRecordScore(team1FinalScore, team2FinalScore)
+    onRecordScore(team1FinalScore.toString(), team2FinalScore.toString())
   };
 
   const canRecord = team1Score.score !== '' && team2Score.score !== '';
@@ -77,25 +76,17 @@ export function FinishGameModal({ visible, rounds, onClose, onRecordScore }: Fin
     }
   }
 
-  const updateCards4 = (team: "team1" | "team2", addKey: string) => {
+  const updateCards4 = (team: "team1" | "team2", val: string) => {
     if (team === "team1") {
-      if (!team1Score.cards4.includes(addKey)) {
-        setTeam1Score({ ...team1Score, cards4: [...team1Score.cards4, addKey] })
-      } else {
-        setTeam1Score({ ...team1Score, cards4: team1Score.cards4.filter(item => item !== addKey) })
-      }
+      setTeam1Score({ ...team1Score, cards4: val });
     } else {
-      if (!team2Score.cards4.includes(addKey)) {
-        setTeam2Score({ ...team2Score, cards4: [...team2Score.cards4, addKey] })
-      } else {
-        setTeam2Score({ ...team2Score, cards4: team2Score.cards4.filter(item => item !== addKey) })
-      }
+      setTeam2Score({ ...team2Score, cards4: val });
     }
   }
 
   const handleClose = () => {
-    setTeam1Score({ score: "", adds: {}, cards4: [] })
-    setTeam2Score({ score: "", adds: {}, cards4: [] })
+    setTeam1Score({ score: "", adds: {}, cards4: '' })
+    setTeam2Score({ score: "", adds: {}, cards4: '' })
 
     onClose()
   }
@@ -149,7 +140,7 @@ export function FinishGameModal({ visible, rounds, onClose, onRecordScore }: Fin
                 placeholderTextColor="#4B5563"
                 maxLength={3}
               />
-              <AddButtons teamScore={team1Score} updateAdd={(adds, count) => updateAdd("team1", adds, count)} updateCards4={(addKey) => updateCards4("team1", addKey)} />
+              <AddButtons teamScore={team1Score} updateAdd={(adds, count) => updateAdd("team1", adds, count)} updateCards4={(val) => updateCards4("team1", val)} />
             </View>
             <View style={styles.vsDivider}>
               <Text style={styles.vsText}>VS</Text>
@@ -165,7 +156,7 @@ export function FinishGameModal({ visible, rounds, onClose, onRecordScore }: Fin
                 placeholderTextColor="#4B5563"
                 maxLength={3}
               />
-              <AddButtons teamScore={team2Score} updateAdd={(adds, count) => updateAdd("team2", adds, count)} updateCards4={(addKey) => updateCards4("team2", addKey)} />
+              <AddButtons teamScore={team2Score} updateAdd={(adds, count) => updateAdd("team2", adds, count)} updateCards4={(val) => updateCards4("team2", val)} />
             </View>
           </View>
 

@@ -9,7 +9,8 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sasunhakobyan.blotking"
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +20,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.sasunhakobyan.blotking"
     },
     "web": {
       "output": "static",
@@ -28,9 +30,16 @@
     "plugins": [
       "expo-router",
       [
-        "expo-asset",
+        "expo-build-properties",
         {
-          "assets": ["./assets/rules.txt"]
+          "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "buildToolsVersion": "35.0.0"
+          },
+          "ios": {
+            "deploymentTarget": "15.1"
+          }
         }
       ],
       [

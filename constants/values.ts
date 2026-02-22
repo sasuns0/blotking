@@ -8,19 +8,6 @@ export const SUITS: Suit[] = [
   { symbol: 'A', name: 'Ace', color: '#F8FAFC', value: "ace" },
 ];
 
-export const Cards4: {
-  [key: string]: {
-    name: string,
-    value: number
-  }
-} = {
-  "9": { value: 14, name: "9" },
-  "j": { value: 20, name: "J" },
-  "q": { value: 10, name: "Q" },
-  "k": { value: 10, name: "K" },
-  "a": { value: 10, name: "A" },
-}
-
 export type AddKey = "blote" | "terz" | "fifty" | "hundred"
 
 export const Adds: Record<AddKey, { name: string, value: number }> = {

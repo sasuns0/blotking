@@ -47,14 +47,6 @@ export default function HomeScreen() {
             <Pressable onPress={() => setStep(1)} style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}>
               <Text style={styles.buttonText}>Նոր Հաշիվ</Text>
             </Pressable>
-
-            <Pressable onPress={() => router.push('/rules')} style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}>
-              <Text style={styles.buttonText}>Կանոններ</Text>
-            </Pressable>
-
-            <Pressable style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}>
-              <Text style={styles.buttonText}>Ստատիստիկա</Text>
-            </Pressable>
           </ThemedView>
           : <ThemedView style={styles.buttonContainer}>
             <TextInput
