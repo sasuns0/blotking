@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
   },
   finalScoreValue: {
     color: '#4ADE80',
-    fontSize: 32,
+    fontSize: 24,
     fontWeight: '700',
   },
   finalScoreDivider: {
