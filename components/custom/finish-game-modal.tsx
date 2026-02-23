@@ -170,7 +170,7 @@ export function FinishGameModal({ visible, rounds, onClose, onRecordScore }: Fin
                 pressed && styles.actionButtonPressed,
               ]}
             >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
+              <Text style={styles.cancelButtonText}>Չեղարկել</Text>
             </Pressable>
             <Pressable
               onPress={handleRecordScore}
@@ -183,7 +183,7 @@ export function FinishGameModal({ visible, rounds, onClose, onRecordScore }: Fin
               ]}
             >
               <Text style={[styles.recordButtonText, !canRecord && styles.recordButtonTextDisabled]}>
-                Record Score
+                Ավարտել
               </Text>
             </Pressable>
           </View>
