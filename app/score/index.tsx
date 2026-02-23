@@ -5,6 +5,7 @@ import { ThemedText } from '@/components/themed-text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StartGameModal } from '@/components/custom/start-game-modal';
 import { FinishGameModal } from '@/components/custom/finish-game-modal';
+import { QuitConfirmationModal } from '@/components/custom/quit-confirmation-modal';
 import { RoundBadge } from '@/components/custom/round-badge';
 import { SUITS } from '@/constants/values';
 import { useTeamsStore } from '@/store/teamsStore';
@@ -39,11 +40,14 @@ export default function ScoreScreen() {
   const [isGameStarted, setGameStarted] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [finishModalVisible, setFinishModalVisible] = useState(false);
+  const [quitModalVisible, setQuitModalVisible] = useState(false);
 
   const openModal = () => setModalVisible(true);
   const closeModal = () => setModalVisible(false);
   const openFinishModal = () => setFinishModalVisible(true);
   const closeFinishModal = () => setFinishModalVisible(false);
+  const openQuitModal = () => setQuitModalVisible(true);
+  const closeQuitModal = () => setQuitModalVisible(false);
 
   const onScoreSubmit = (round: Round) => {
     setRounds([...rounds, { round, team1: '', team2: '' }])
@@ -78,7 +82,7 @@ export default function ScoreScreen() {
       <View style={styles.header}>
         <View style={styles.leftButtonContainer}>
           <Pressable
-            onPress={() => router.back()}
+            onPress={openQuitModal}
             style={({ pressed }) => [
               styles.backButton,
               pressed && styles.backButtonPressed,
@@ -114,6 +118,8 @@ export default function ScoreScreen() {
         onClose={closeFinishModal}
         onRecordScore={onRecordScore}
       />
+
+      <QuitConfirmationModal visible={quitModalVisible} onClose={closeQuitModal} />
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         {/* Grid Header */}

@@ -20,6 +20,9 @@ export default function HomeScreen() {
       // Save team names to store
       setTeam1Name(team1Input);
       setTeam2Name(team2Input);
+
+      setTeam1Input("");
+      setTeam2Input("");
       router.push('/score')
     }
   }
