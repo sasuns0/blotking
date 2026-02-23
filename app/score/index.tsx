@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { router } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StartGameModal } from '@/components/custom/start-game-modal';
 import { FinishGameModal } from '@/components/custom/finish-game-modal';
 import { QuitConfirmationModal } from '@/components/custom/quit-confirmation-modal';
+import { RoundActionTooltip } from '@/components/custom/round-action-tooltip';
 import { RoundBadge } from '@/components/custom/round-badge';
-import { SUITS } from '@/constants/values';
 import { useTeamsStore } from '@/store/teamsStore';
 
 export type SuitType = "spade" | "club" | "heart" | "diamond" | "ace";
@@ -41,6 +40,8 @@ export default function ScoreScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [finishModalVisible, setFinishModalVisible] = useState(false);
   const [quitModalVisible, setQuitModalVisible] = useState(false);
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+  const [selectedRoundIndex, setSelectedRoundIndex] = useState<number | null>(null);
 
   const openModal = () => setModalVisible(true);
   const closeModal = () => setModalVisible(false);
@@ -48,15 +49,25 @@ export default function ScoreScreen() {
   const closeFinishModal = () => setFinishModalVisible(false);
   const openQuitModal = () => setQuitModalVisible(true);
   const closeQuitModal = () => setQuitModalVisible(false);
+  const openTooltip = (index: number) => {
+    setSelectedRoundIndex(index);
+    setTooltipVisible(true);
+  };
+  const closeTooltip = () => {
+    setTooltipVisible(false);
+    setSelectedRoundIndex(null);
+  };
+  const deleteRound = () => {
+    if (selectedRoundIndex !== null) {
+      setRounds(prevRounds => prevRounds.filter((_, i) => i !== selectedRoundIndex));
+      closeTooltip();
+    }
+  };
 
   const onScoreSubmit = (round: Round) => {
     setRounds([...rounds, { round, team1: '', team2: '' }])
     setGameStarted(true)
     closeModal()
-  }
-
-  const getSuiteByValue = (value: SuitType) => {
-    return SUITS.find(item => item.value === value)?.symbol;
   }
 
   const onRecordScore = (team1Score: string, team2Score: string) => {
@@ -121,6 +132,13 @@ export default function ScoreScreen() {
 
       <QuitConfirmationModal visible={quitModalVisible} onClose={closeQuitModal} />
 
+      <RoundActionTooltip
+        visible={tooltipVisible}
+        onClose={closeTooltip}
+        onDelete={deleteRound}
+        roundIndex={selectedRoundIndex ?? 0}
+      />
+
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         {/* Grid Header */}
         <View style={styles.gridHeader}>
@@ -130,25 +148,30 @@ export default function ScoreScreen() {
         </View>
 
         {/* Grid Rows */}
-        {rounds?.map((item, index) => (
-          <View
-            key={index}
-            style={[
-              styles.gridRow,
-              index % 2 !== 0 && styles.gridRowEven,
-            ]}
-          >
-            <View style={styles.gridCell}>
-              <RoundBadge round={item.round} />
-            </View>
-            <View style={styles.gridCell}>
-              <Text style={styles.gridCellText}>{item.team1}</Text>
-            </View>
-            <View style={styles.gridCell}>
-              <Text style={styles.gridCellText}>{item.team2}</Text>
-            </View>
-          </View>
-        ))}
+        {rounds?.map((item, index) => {
+          const isRoundCompleted = item.team1 !== '' && item.team2 !== '';
+          return (
+            <Pressable
+              key={index}
+              onPress={() => isRoundCompleted && openTooltip(index)}
+              style={({ pressed }) => [
+                styles.gridRow,
+                index % 2 !== 0 && styles.gridRowEven,
+                isRoundCompleted && pressed && styles.gridRowPressed,
+              ]}
+            >
+              <View style={styles.gridCell}>
+                <RoundBadge round={item.round} />
+              </View>
+              <View style={styles.gridCell}>
+                <Text style={styles.gridCellText}>{item.team1}</Text>
+              </View>
+              <View style={styles.gridCell}>
+                <Text style={styles.gridCellText}>{item.team2}</Text>
+              </View>
+            </Pressable>
+          );
+        })}
       </ScrollView>
 
       {/* Final Score Footer - Sticky Bottom */}
@@ -346,5 +369,9 @@ const styles = StyleSheet.create({
     height: 36,
     textAlign: 'center',
     lineHeight: 34,
+  },
+  // Grid row pressed state
+  gridRowPressed: {
+    backgroundColor: 'rgba(43, 90, 66, 0.3)',
   },
 });
